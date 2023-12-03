@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'logic/red_alert.dart';
+import 'package:red_alert_test/logic/red_alert.dart';
 
 /// Main entry point of the application.
 Future<void> main() async {

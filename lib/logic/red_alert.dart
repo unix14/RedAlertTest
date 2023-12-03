@@ -61,7 +61,7 @@ class RedAlert {
   }
 
   List<Map<String, dynamic>> getLocationsList() {
-    final file = 'targets.json';
+    final file = 'data/targets.json';
     final jsonString = '{"locations": []}'; // Replace with your JSON content
     final jsonMap = jsonDecode(jsonString);
     return List<Map<String, dynamic>>.from(jsonMap["locations"]);
