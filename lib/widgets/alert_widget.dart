@@ -4,7 +4,7 @@ import 'package:red_alert_test/models/alert.dart';
 class AlertWidget extends StatelessWidget {
   final Alert alert;
 
-  AlertWidget({required this.alert});
+  AlertWidget({this.alert});
 
   @override
   Widget build(BuildContext context) {

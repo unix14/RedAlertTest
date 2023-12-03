@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:red_alert_test/common/red_alert_logger.dart';
 import 'package:red_alert_test/logic/red_alert.dart';
 
 /// Main entry point of the application.
@@ -11,7 +12,7 @@ Future<void> main() async {
     var migunTime = 0;
 
     await Future.delayed(Duration(seconds: 45));
-    print("[-] Searching for alerts ...");
+    RedAlertLogger.logInfo("[-] Searching for alerts ...");
 
     final redAlerts = await alert.getRedAlerts();
 
@@ -28,11 +29,11 @@ Future<void> main() async {
         redAlerts["time_to_run"] = migunTime;
 
         // Do whatever you need to do with the data
-        print("cityData.length is" + cityData.length.toString());
-        print("migunTime is" + migunTime.toString());
+        RedAlertLogger.logInfo("cityData.length is" + cityData.length.toString());
+        RedAlertLogger.logInfo("migunTime is" + migunTime.toString());
       }
     } else {
-      print("[-] No alerts for now, keep checking ...");
+      RedAlertLogger.logInfo("[-] No alerts for now, keep checking ...");
     }
   }
 }

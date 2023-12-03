@@ -4,7 +4,7 @@ import 'package:red_alert_test/models/area.dart';
 class AreaSelectionScreen extends StatelessWidget {
   final List<Area> areas;
 
-  AreaSelectionScreen({required this.areas});
+  AreaSelectionScreen({this.areas});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class AreaSelectionScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final area = areas[index];
           return ListTile(
-            title: Text(area.name),
+            title: Text(area.areaName),
             onTap: () {
               // TODO: Navigate to the main screen with the selected area
             },
