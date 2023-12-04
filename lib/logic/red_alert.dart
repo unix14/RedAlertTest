@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:convert';
+import 'dart:io'; // Import this for File class
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
@@ -61,17 +63,24 @@ class RedAlert {
   }
 
   List<Map<String, dynamic>> getLocationsList() {
-    final file = 'data/targets.json';
-    final jsonString = '{"locations": []}'; // Replace with your JSON content
-    final jsonMap = jsonDecode(jsonString);
-    return List<Map<String, dynamic>>.from(jsonMap["locations"]);
+    final file = File('assets/data/targets.json'); // Adjust the path accordingly
+
+    try {
+      final jsonString = file.readAsStringSync();
+      final jsonMap = jsonDecode(jsonString);
+      return List<Map<String, dynamic>>.from(jsonMap["locations"]);
+    } catch (e) {
+      // Handle file reading or JSON decoding errors
+      print("Error reading JSON file: $e");
+      return []; // Return an empty list or handle the error as needed
+    }
   }
 
   Future<Map<String, dynamic>> getRedAlerts() async {
     final host = RedAlertConstants.alertsEndpoint;
 
     final response = await http.get(Uri.parse(host), headers: headers);
-    RedAlertLogger.logInfo('[-] Showing response ...' + response.body);
+    // RedAlertLogger.logInfo('[-] Showing response ...' + response.body);
     final alerts = response.body.replaceAll("\n", "").replaceAll("\r", "");
 
     // Remove BOM and other non-RedAlertLogger.logInfoable characters
@@ -81,9 +90,17 @@ class RedAlert {
       return null;
     }
 
+    final String responseBody = response.body;
+
+    // Decode the response using UTF-8 encoding
+    final utf8Decoder = Utf8Decoder(allowMalformed: true);
+    final cleanedResponse = utf8Decoder.convert(responseBody.codeUnits);
+
+    RedAlertLogger.logInfo('[-] Showing response.body ...' + response.body);
+    RedAlertLogger.logInfo('[-] Showing cleanedResponse ...' + cleanedResponse);
     RedAlertLogger.logInfo('[-] Showing Alerts!!!! ...' + cleanAlerts);
 
-    final Map<String, dynamic> json = jsonDecode(cleanAlerts);
+    final Map<String, dynamic> json = jsonDecode(cleanedResponse);
     if ((json["data"] as List).isEmpty) {
       return null;
     }

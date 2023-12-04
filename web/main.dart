@@ -12,7 +12,7 @@ Future<void> main() async {
     var migunTime = 0;
 
     await Future.delayed(Duration(seconds: 45));
-    RedAlertLogger.logInfo("[-] Searching for alerts ...");
+    // RedAlertLogger.logInfo("[-] Searching for alerts ...");
 
     final redAlerts = await alert.getRedAlerts();
 
@@ -33,7 +33,7 @@ Future<void> main() async {
         RedAlertLogger.logInfo("migunTime is" + migunTime.toString());
       }
     } else {
-      RedAlertLogger.logInfo("[-] No alerts for now, keep checking ...");
+      // RedAlertLogger.logInfo("[-] No alerts for now, keep checking ...");
     }
   }
 }
