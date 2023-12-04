@@ -67,7 +67,7 @@ class RedAlert {
     final file = File('assets/data/targets.json');
 
     try {
-      final jsonString = file.readAsStringSync();
+      final jsonString = file.readAsStringSync(encoding: utf8);
       if (jsonString.isNotEmpty) {
         final jsonMap = jsonDecode(jsonString);
         if (jsonMap["locations"] != null) {
