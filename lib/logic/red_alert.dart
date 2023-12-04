@@ -62,18 +62,23 @@ class RedAlert {
     return (alertsData["data"] as List).length;
   }
 
+
   List<Map<String, dynamic>> getLocationsList() {
-    final file = File('assets/data/targets.json'); // Adjust the path accordingly
+    final file = File('assets/data/targets.json');
 
     try {
       final jsonString = file.readAsStringSync();
-      final jsonMap = jsonDecode(jsonString);
-      return List<Map<String, dynamic>>.from(jsonMap["locations"]);
+      if (jsonString.isNotEmpty) {
+        final jsonMap = jsonDecode(jsonString);
+        if (jsonMap["locations"] != null) {
+          return List<Map<String, dynamic>>.from(jsonMap["locations"]);
+        }
+      }
     } catch (e) {
-      // Handle file reading or JSON decoding errors
       print("Error reading JSON file: $e");
-      return []; // Return an empty list or handle the error as needed
     }
+
+    return []; // Return an empty list or handle the error as needed
   }
 
   Future<Map<String, dynamic>> getRedAlerts() async {
