@@ -46,36 +46,26 @@ class RedAlert {
     cookies = response.headers["set-cookie"] ?? "";
   }
 
-  /// Fetches coordinates for a given location name using Google Maps API.
-  Map<String, dynamic> randomCoordinates(double latitude, double longitude) {
-    final circleR = 1.0;
-    final circleX = latitude;
-    final circleY = longitude;
-    final alpha = 2 * pi * Random().nextDouble();
-    final r = circleR * Random().nextDouble();
-    final x = r * cos(alpha) + circleX;
-    final y = r * sin(alpha) + circleY;
-    return {"latitude": x, "longitude": y};
-  }
-
-  int countAlerts(Map<String, dynamic> alertsData) {
+  int getAlertCount(Map<String, dynamic> alertsData) {
     return (alertsData["data"] as List).length;
   }
 
-
   List<Map<String, dynamic>> getLocationsList() {
-    final file = File('assets/data/targets.json');
+    final file = File('assets\\data\\targets.json');
 
     try {
       final jsonString = file.readAsStringSync(encoding: utf8);
-      if (jsonString.isNotEmpty) {
-        final jsonMap = jsonDecode(jsonString);
-        if (jsonMap["locations"] != null) {
-          return List<Map<String, dynamic>>.from(jsonMap["locations"]);
-        }
-      }
+      final jsonMap = jsonDecode(jsonString);
+      final List<Map<String, dynamic>> locationsList = [];
+
+      jsonMap.forEach((key, value) {
+        final locationData = Map<String, dynamic>.from(value);
+        locationsList.add(locationData);
+      });
+
+      return locationsList;
     } catch (e) {
-      print("Error reading JSON file: $e");
+      RedAlertLogger.logInfo('Error reading JSON file: $e');
     }
 
     return []; // Return an empty list or handle the error as needed
@@ -85,8 +75,8 @@ class RedAlert {
     final host = RedAlertConstants.alertsEndpoint;
 
     final response = await http.get(Uri.parse(host), headers: headers);
-    // RedAlertLogger.logInfo('[-] Showing response ...' + response.body);
-    final alerts = response.body.replaceAll("\n", "").replaceAll("\r", "");
+    final String responseBody = response.body;
+    final alerts = responseBody.replaceAll("\n", "").replaceAll("\r", "");
 
     // Remove BOM and other non-RedAlertLogger.logInfoable characters
     final cleanAlerts = alerts.replaceAll(RegExp('[^ -~]+'), '');
@@ -95,15 +85,11 @@ class RedAlert {
       return null;
     }
 
-    final String responseBody = response.body;
-
     // Decode the response using UTF-8 encoding
     final utf8Decoder = Utf8Decoder(allowMalformed: true);
     final cleanedResponse = utf8Decoder.convert(responseBody.codeUnits);
 
-    RedAlertLogger.logInfo('[-] Showing response.body ...' + response.body);
     RedAlertLogger.logInfo('[-] Showing cleanedResponse ...' + cleanedResponse);
-    RedAlertLogger.logInfo('[-] Showing Alerts!!!! ...' + cleanAlerts);
 
     final Map<String, dynamic> json = jsonDecode(cleanedResponse);
     if ((json["data"] as List).isEmpty) {
