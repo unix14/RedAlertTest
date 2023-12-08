@@ -12,7 +12,7 @@ class RedAlertLogger {
     _logger.i(logMessage);
   }
 
-  static void logError(String message, [dynamic error, StackTrace stackTrace]) {
-    _logger.e(message, error, stackTrace);
+  static void logError(String message, [dynamic error, StackTrace? stackTrace]) {
+    _logger.e(message, error: error, stackTrace: stackTrace);
   }
 }

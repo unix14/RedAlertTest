@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:convert';
-import 'dart:io'; // Import this for File class
+import 'dart:io';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
@@ -9,12 +8,12 @@ import '../common/constants.dart';
 import '../common/red_alert_logger.dart';
 
 class RedAlert {
-  List<Map<String, dynamic>> locations;
-  String cookies;
-  Map<String, String> headers;
+  late List<Map<String, dynamic>> locations;
+  late String cookies;
+  late Map<String, String> headers;
 
-  RedAlert() {
-    locations = getLocationsList();
+  RedAlert(){
+    // locations = getLocationsList();
     cookies = "";
     headers = {
       "Host": "www.oref.org.il",
@@ -41,7 +40,7 @@ class RedAlert {
 
   /// Fetches cookies from the host.
   Future<void> getCookies() async {
-    final host = RedAlertConstants.host;
+    const host = RedAlertConstants.host;
     final response = await http.get(Uri.parse(host), headers: headers);
     cookies = response.headers["set-cookie"] ?? "";
   }
@@ -51,28 +50,36 @@ class RedAlert {
   }
 
   List<Map<String, dynamic>> getLocationsList() {
-    final file = File('assets\\data\\targets.json');
+    final file = File('assets/targets.json');
+
+    // RedAlertLogger.logInfo('Current working directory: ${Directory.current.path}');
 
     try {
-      final jsonString = file.readAsStringSync(encoding: utf8);
-      final jsonMap = jsonDecode(jsonString);
-      final List<Map<String, dynamic>> locationsList = [];
+      if (file.existsSync()) {
+        // File exists, proceed with reading.
+        // Your code to read the file goes here.
+        final jsonString = file.readAsStringSync(encoding: utf8);
+        final jsonMap = jsonDecode(jsonString);
+        final List<Map<String, dynamic>> locationsList = [];
 
-      jsonMap.forEach((key, value) {
-        final locationData = Map<String, dynamic>.from(value);
-        locationsList.add(locationData);
-      });
+        jsonMap.forEach((key, value) {
+          final locationData = Map<String, dynamic>.from(value);
+          locationsList.add(locationData);
+        });
 
-      return locationsList;
+        return locationsList;
+      } else {
+        RedAlertLogger.logError('Error: File not found. ${file.path}');
+      }
     } catch (e) {
-      RedAlertLogger.logInfo('Error reading JSON file: $e');
+      RedAlertLogger.logError('Error reading JSON file: $e');
     }
 
     return []; // Return an empty list or handle the error as needed
   }
 
-  Future<Map<String, dynamic>> getRedAlerts() async {
-    final host = RedAlertConstants.alertsEndpoint;
+  Future<Map<String, dynamic>?> getRedAlerts() async {
+    const host = RedAlertConstants.alertsEndpoint;
 
     final response = await http.get(Uri.parse(host), headers: headers);
     final String responseBody = response.body;
@@ -86,10 +93,10 @@ class RedAlert {
     }
 
     // Decode the response using UTF-8 encoding
-    final utf8Decoder = Utf8Decoder(allowMalformed: true);
+    const utf8Decoder = Utf8Decoder(allowMalformed: true);
     final cleanedResponse = utf8Decoder.convert(responseBody.codeUnits);
 
-    RedAlertLogger.logInfo('[-] Showing cleanedResponse ...' + cleanedResponse);
+    RedAlertLogger.logInfo('[-] Showing cleanedResponse ...$cleanedResponse');
 
     final Map<String, dynamic> json = jsonDecode(cleanedResponse);
     if ((json["data"] as List).isEmpty) {

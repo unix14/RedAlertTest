@@ -1,9 +1,36 @@
-import 'package:flutter/material.dart';
-import 'logic/red_alert.dart';
-import 'widgets/home_screen.dart';
+import 'dart:convert';
 
-void main() {
-  runApp(MyApp());
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:red_alert_test_android/widgets/area_selection_screen.dart';
+
+import 'logic/red_alert.dart';
+import 'models/area.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  String jsonString = await rootBundle.loadString('assets/targets.json');
+  // Map<String, dynamic> jsonData = json.decode(jsonString);
+
+  // Decode the JSON data as a Map<String, dynamic>
+  Map<String, dynamic> jsonData = json.decode(jsonString);
+
+  // Extract values as a List<dynamic>
+  List<dynamic> jsonList = jsonData.values.toList();
+
+  // Convert the List<dynamic> to a List<Area>
+  List<Area> areas = jsonList.map((json) => Area.fromJson(json)).toList();
+
+
+  print('JSON Data: $jsonList');
+
+
+  // Create an instance of MyApp with the loaded data
+  MyApp myApp = MyApp(areas);
+
+  // Run the application with MyApp instance
+  runApp(myApp);
 }
 
 // class MyApp extends StatelessWidget {
@@ -20,11 +47,20 @@ void main() {
 // }
 
 class MyApp extends StatelessWidget {
+  final List<Area> areas;
+
+  MyApp(this.areas);
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Red Alert Test',
-      home: TestScreen(),
+      // home: HomeScreen(), // todo fix issues here
+      // home: TestScreen(),
+      home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: AreaSelectionScreen(areas: areas)),
     );
   }
 }
@@ -36,23 +72,23 @@ class TestScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Test Screen'),
+        title: const Text('Test Screen'),
       ),
       body: FutureBuilder(
         future: redAlert.getRedAlerts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             // Process and display the details of the response
-            final responseDetails = buildResponseDetails(snapshot.data);
+            final responseDetails = buildResponseDetails(snapshot.data ?? Map());
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     'Response Details:',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(responseDetails),
                 ],
               ),
@@ -62,7 +98,7 @@ class TestScreen extends StatelessWidget {
               child: Text('Error: ${snapshot.error}'),
             );
           } else {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }

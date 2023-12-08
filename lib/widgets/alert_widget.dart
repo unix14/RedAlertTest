@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:red_alert_test/models/alert.dart';
+import 'package:red_alert_test_android/models/alert.dart';
 
 class AlertWidget extends StatelessWidget {
   final Alert alert;
 
-  AlertWidget({this.alert});
+  AlertWidget({required this.alert});
 
   @override
   Widget build(BuildContext context) {
