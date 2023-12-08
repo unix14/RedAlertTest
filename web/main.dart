@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:red_alert_test/common/red_alert_logger.dart';
-import 'package:red_alert_test/logic/red_alert.dart';
+
+import 'package:red_alert_test_android/common/red_alert_logger.dart';
+import 'package:red_alert_test_android/logic/red_alert.dart';
 
 /// Main entry point of the application.
 Future<void> main() async {

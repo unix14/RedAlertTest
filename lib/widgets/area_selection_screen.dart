@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/models/area.dart';
 
+import '../common/styles.dart';
 import 'home_screen.dart';
 
 class AreaSelectionScreen extends StatefulWidget {
@@ -77,13 +78,9 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
                     ),
                   );
                 } : null, // Disable the button if selectedAreas is empty
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                    selectedAreas.isNotEmpty ? Colors.blue : Colors.grey,
-                  ),
-                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(const EdgeInsets.all(8.0)),
-                ),
+                style: selectedAreas.isNotEmpty
+                    ? kBlueButtonStyle
+                    : kGreyButtonStyle,
                 child: const Text('סיום'),
               ),
             ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/models/area.dart';
-import 'area_selection_screen.dart'; // Import the screen where areas are selected
+
+import '../common/styles.dart';
+import 'area_selection_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final List<Area> selectedAreas;
@@ -16,46 +18,49 @@ class HomeScreen extends StatelessWidget {
           title: const Text('אזעקת אמת'),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Wrap(
-            alignment: WrapAlignment.start,
-            spacing: 10.0, // Set the spacing between chips
-            runSpacing: 10.0, // Set the spacing between rows
-            children: [
-              InkWell(
-                onTap: () {
-                  // Navigate back to the area selection screen
-                  Navigator.of(context).pop();
-                },
-                child: Chip(
-                  label: const Text(
-                    'הוספה',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+          padding: const EdgeInsets.all(18.0),
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.start,
+              spacing: 10.0,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    // Navigate back to the area selection screen
+                    Navigator.of(context).pop();
+                  },
+                  style: kBlueButtonStyle,
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'הוספת איזורי התראה',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  backgroundColor: Colors.blue.withOpacity(0.7),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
                 ),
-              ),
-              for (final area in selectedAreas)
-                Chip(
-                  label: Text(
-                    area.labelHe ?? area.label ?? area.areaName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                for (final area in selectedAreas)
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Chip(
+                      label: Text(
+                        area.labelHe ?? area.label ?? area.areaName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      backgroundColor: Colors.orange.withOpacity(0.7),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
                     ),
                   ),
-                  backgroundColor: Colors.orange.withOpacity(0.7),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
