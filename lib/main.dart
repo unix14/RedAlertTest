@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
 }
 
 class TestScreen extends StatelessWidget {
-  final RedAlert redAlert = RedAlert();
+  // final RedAlert redAlert = RedAlert();
 
   @override
   Widget build(BuildContext context) {
@@ -74,36 +74,36 @@ class TestScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Test Screen'),
       ),
-      body: FutureBuilder(
-        future: redAlert.getRedAlerts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            // Process and display the details of the response
-            final responseDetails = buildResponseDetails(snapshot.data ?? Map());
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Response Details:',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(responseDetails),
-                ],
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
+      // body: FutureBuilder(
+      //   future: redAlert.getRedAlerts(),
+      //   builder: (context, snapshot) {
+      //     if (snapshot.connectionState == ConnectionState.done) {
+      //       // Process and display the details of the response
+      //       final responseDetails = buildResponseDetails(snapshot.data ?? Map());
+      //       return Center(
+      //         child: Column(
+      //           mainAxisAlignment: MainAxisAlignment.center,
+      //           children: [
+      //             const Text(
+      //               'Response Details:',
+      //               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      //             ),
+      //             const SizedBox(height: 20),
+      //             Text(responseDetails),
+      //           ],
+      //         ),
+      //       );
+      //     } else if (snapshot.hasError) {
+      //       return Center(
+      //         child: Text('Error: ${snapshot.error}'),
+      //       );
+      //     } else {
+      //       return const Center(
+      //         child: CircularProgressIndicator(),
+      //       );
+      //     }
+      //   },
+      // ),
     );
   }
 

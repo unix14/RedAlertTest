@@ -1,20 +1,30 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
+import 'package:http/browser_client.dart' as http;
 
 import '../common/constants.dart';
 import '../common/red_alert_logger.dart';
+import '../models/area.dart';
+
+typedef AlarmCallback = Function();
+
 
 class RedAlert {
-  late List<Map<String, dynamic>> locations;
+  late List<Area> selectedAreas;
   late String cookies;
   late Map<String, String> headers;
 
-  RedAlert(){
-    // locations = getLocationsList();
+  late AlarmCallback onAlarmActivated;
+  late bool isAlarmActive;
+  late Timer alertCheckTimer;
+
+  RedAlert(this.selectedAreas, {required this.onAlarmActivated}) {
     cookies = "";
+    isAlarmActive = false;
     headers = {
       "Host": "www.oref.org.il",
       "Connection": "keep-alive",
@@ -33,15 +43,31 @@ class RedAlert {
       "Referer": "https://www.oref.org.il/12481-he/Pakar.aspx",
       "Accept-Encoding": "gzip, deflate, br",
       "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+      "Access-Control-Allow-Origin": "*",  // Add this line for CORS
+      "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+      "Access-Control-Allow-Methods": "GET, HEAD",
     };
 
-    getCookies();
+    // Initialize the timer for periodic alert checks
+    alertCheckTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      await getCookies();
+      // Check for new alerts
+      final alertsData = await getRedAlerts();
+      if (alertsData != null) {
+        final alertCount = getAlertCount(alertsData);
+        if (alertCount > 0) {
+          activateAlarm();
+        }
+      }
+    });
+
   }
 
   /// Fetches cookies from the host.
   Future<void> getCookies() async {
     const host = RedAlertConstants.host;
-    final response = await http.get(Uri.parse(host), headers: headers);
+    var uri = Uri.parse(host);
+    final response = await http.BrowserClient().get(uri, headers: headers);
     cookies = response.headers["set-cookie"] ?? "";
   }
 
@@ -49,61 +75,72 @@ class RedAlert {
     return (alertsData["data"] as List).length;
   }
 
-  List<Map<String, dynamic>> getLocationsList() {
-    final file = File('assets/targets.json');
-
-    // RedAlertLogger.logInfo('Current working directory: ${Directory.current.path}');
-
-    try {
-      if (file.existsSync()) {
-        // File exists, proceed with reading.
-        // Your code to read the file goes here.
-        final jsonString = file.readAsStringSync(encoding: utf8);
-        final jsonMap = jsonDecode(jsonString);
-        final List<Map<String, dynamic>> locationsList = [];
-
-        jsonMap.forEach((key, value) {
-          final locationData = Map<String, dynamic>.from(value);
-          locationsList.add(locationData);
-        });
-
-        return locationsList;
-      } else {
-        RedAlertLogger.logError('Error: File not found. ${file.path}');
-      }
-    } catch (e) {
-      RedAlertLogger.logError('Error reading JSON file: $e');
-    }
-
-    return []; // Return an empty list or handle the error as needed
-  }
-
   Future<Map<String, dynamic>?> getRedAlerts() async {
     const host = RedAlertConstants.alertsEndpoint;
 
-    final response = await http.get(Uri.parse(host), headers: headers);
-    final String responseBody = response.body;
-    final alerts = responseBody.replaceAll("\n", "").replaceAll("\r", "");
+    try {
+      final Uri uri = Uri.parse(host);
 
-    // Remove BOM and other non-RedAlertLogger.logInfoable characters
-    final cleanAlerts = alerts.replaceAll(RegExp('[^ -~]+'), '');
+      //todo think about diffrentiation between mobile and chrome\web
+      final response = await http.BrowserClient().get(uri, headers: headers);
 
-    if (cleanAlerts.isEmpty) {
-      return null;
+      if (response.statusCode == 200) {
+        final String responseBody = response.body;
+        final alerts = responseBody.replaceAll("\n", "").replaceAll("\r", "");
+
+        // Remove BOM and other non-RedAlertLogger.logInfoable characters
+        final cleanAlerts = alerts.replaceAll(RegExp('[^ -~]+'), '');
+
+        if (cleanAlerts.isEmpty) {
+          return null;
+        }
+
+        // Decode the response using UTF-8 encoding
+        const utf8Decoder = Utf8Decoder(allowMalformed: true);
+        final cleanedResponse = utf8Decoder.convert(responseBody.codeUnits);
+
+        RedAlertLogger.logInfo('[-] Showing cleanedResponse ...$cleanedResponse');
+
+        final Map<String, dynamic> json = jsonDecode(cleanedResponse);
+        if ((json["data"] as List).isEmpty) {
+          return null;
+        }
+
+        json["timestamp"] = DateTime.now().millisecondsSinceEpoch;
+        return json;
+      } else {
+        // Handle non-200 status code
+        RedAlertLogger.logError('Non-200 status code: ${response.statusCode}');
+        RedAlertLogger.logInfo('Non-200 response body: ${response.body}');
+        return null; // or throw an exception if necessary
+      }
+    } catch (e, stackTrace) {
+      // Handle the error, log it, or return a specific value
+      RedAlertLogger.logError('Error in getRedAlerts: ${e.hashCode} ${e.runtimeType} $e\n$stackTrace');
+      return null; // or throw the error again if necessary
     }
-
-    // Decode the response using UTF-8 encoding
-    const utf8Decoder = Utf8Decoder(allowMalformed: true);
-    final cleanedResponse = utf8Decoder.convert(responseBody.codeUnits);
-
-    RedAlertLogger.logInfo('[-] Showing cleanedResponse ...$cleanedResponse');
-
-    final Map<String, dynamic> json = jsonDecode(cleanedResponse);
-    if ((json["data"] as List).isEmpty) {
-      return null;
-    }
-
-    json["timestamp"] = DateTime.now().millisecondsSinceEpoch;
-    return json;
   }
+
+  void activateAlarm() {
+    if (!isAlarmActive) {
+      // Set the alarm active flag to true
+      isAlarmActive = true;
+
+      // Trigger the callback function provided by HomeScreen
+      onAlarmActivated();
+
+      // Set a timer for 10 minutes (600 seconds)
+      Timer(const Duration(minutes: 10), () {
+        // When the timer expires, reset the alarm flag
+        if (isAlarmActive) {
+          // Check if the alarm is still active before resetting
+          isAlarmActive = false;
+
+          // Trigger the callback function provided by HomeScreen to reset UI
+          onAlarmActivated();
+        }
+      });
+    }
+  }
+
 }
