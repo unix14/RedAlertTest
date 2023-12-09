@@ -18,14 +18,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    redAlert =
-        RedAlert(widget.selectedAreas, onAlarmActivated: updateUIOnAlarm);
+    redAlert = RedAlert(widget.selectedAreas, onAlarmActivated: updateUIOnAlarm);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    redAlert.cancelTimer();
   }
 
   void updateUIOnAlarm() {
     if (mounted) {
       setState(() {
         // Update UI here
+        //Todo add a ui to the screen and update it here
       });
     }
   }

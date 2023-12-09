@@ -43,9 +43,6 @@ class RedAlert {
       "Referer": "https://www.oref.org.il/12481-he/Pakar.aspx",
       "Accept-Encoding": "gzip, deflate, br",
       "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-      "Access-Control-Allow-Origin": "*",  // Add this line for CORS
-      "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
-      "Access-Control-Allow-Methods": "GET, HEAD",
     };
 
     // Initialize the timer for periodic alert checks
@@ -60,7 +57,10 @@ class RedAlert {
         }
       }
     });
+  }
 
+  void cancelTimer() {
+    alertCheckTimer.cancel();
   }
 
   /// Fetches cookies from the host.
@@ -111,7 +111,7 @@ class RedAlert {
       } else {
         // Handle non-200 status code
         RedAlertLogger.logError('Non-200 status code: ${response.statusCode}');
-        RedAlertLogger.logInfo('Non-200 response body: ${response.body}');
+        RedAlertLogger.logInfo('Non-200 response body:\n${response.body}');
         return null; // or throw an exception if necessary
       }
     } catch (e, stackTrace) {
@@ -136,8 +136,10 @@ class RedAlert {
           // Check if the alarm is still active before resetting
           isAlarmActive = false;
 
+          //todo remove duplicate call here?
           // Trigger the callback function provided by HomeScreen to reset UI
           onAlarmActivated();
+          //todo add response from RedAlert code into home screen callabck
         }
       });
     }
