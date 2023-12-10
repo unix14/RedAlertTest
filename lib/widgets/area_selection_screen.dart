@@ -79,7 +79,11 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
 }
 
 BottomAppBar buildBottomAppBar(
-    BuildContext context, Set<Area> selectedAreas, AreaCallback onDelete) {
+    BuildContext context,
+    Set<Area> selectedAreas,
+    AreaCallback onDelete,
+    {bool finishButtonIsVisible = true}
+    ) {
   return BottomAppBar(
     child: Padding(
       padding: const EdgeInsets.all(8.0),
@@ -87,7 +91,7 @@ BottomAppBar buildBottomAppBar(
         children: [
           for (final area in selectedAreas) createAreaChip(area, onDelete),
           const Spacer(),
-          TextButton(
+          finishButtonIsVisible ? TextButton(
             onPressed: selectedAreas.isNotEmpty
                 ? () {
                     // Navigate to HomeScreen with selected areas
@@ -102,7 +106,7 @@ BottomAppBar buildBottomAppBar(
             style:
                 selectedAreas.isNotEmpty ? kBlueButtonStyle : kGreyButtonStyle,
             child: const Text('סיום'),
-          ),
+          ) : Container(),
         ],
       ),
     ),
@@ -179,7 +183,7 @@ class AreaSearchDelegate extends SearchDelegate<Area?> {
           buildBottomAppBar(context, selectedAreas, (area) {
             updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
             close(context, null);
-          })
+          }, finishButtonIsVisible: false)
         ],
       ),
     );
