@@ -8,6 +8,7 @@ import 'package:http/browser_client.dart' as http;
 
 import '../common/constants.dart';
 import '../common/red_alert_logger.dart';
+import '../models/alert_model.dart';
 import '../models/area.dart';
 
 typedef AlarmCallback = Function();
@@ -73,6 +74,30 @@ class RedAlert {
 
   int getAlertCount(Map<String, dynamic> alertsData) {
     return (alertsData["data"] as List).length;
+  }
+
+  Future<List<AlertModel>> getRedAlertsHistory() async {
+    try {
+      final Uri uri = Uri.parse(RedAlertConstants.historyUrl);
+      final response = await http.BrowserClient().get(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        // Decode the response using UTF-8 encoding
+        const utf8Decoder = Utf8Decoder(allowMalformed: true);
+        final cleanedResponse = utf8Decoder.convert(response.body.codeUnits);
+
+        final List<dynamic> jsonList = jsonDecode(cleanedResponse);
+        final List<AlertModel> alertList = jsonList.map((json) => AlertModel.fromJson(json)).toList();
+        return alertList;
+      } else {
+        RedAlertLogger.logError('Non-200 status code: ${response.statusCode}');
+        RedAlertLogger.logInfo('Non-200 response body:\n${response.body}');
+        return [];
+      }
+    } catch (e, stackTrace) {
+      RedAlertLogger.logError('Error in getRedAlerts: ${e.hashCode} ${e.runtimeType} $e\n$stackTrace');
+      return [];
+    }
   }
 
   Future<Map<String, dynamic>?> getRedAlerts() async {

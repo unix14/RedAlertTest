@@ -7,6 +7,8 @@ import 'package:red_alert_test_android/widgets/area_selection_screen.dart';
 import 'logic/red_alert.dart';
 import 'models/area.dart';
 
+List<Area> areas = [];
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -20,7 +22,7 @@ void main() async {
   List<dynamic> jsonList = jsonData.values.toList();
 
   // Convert the List<dynamic> to a List<Area>
-  List<Area> areas = jsonList.map((json) => Area.fromJson(json)).toList();
+  areas = jsonList.map((json) => Area.fromJson(json)).toList();
 
 
   print('JSON Data: $jsonList');
@@ -56,6 +58,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Red Alert Test',
+      debugShowCheckedModeBanner: false,
       // home: HomeScreen(), // todo fix issues here
       // home: TestScreen(),
       home: Directionality(

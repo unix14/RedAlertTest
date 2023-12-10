@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/models/area.dart';
 
+import '../common/extensions.dart';
 import '../common/styles.dart';
 import 'home_screen.dart';
 
 class AreaSelectionScreen extends StatefulWidget {
   final List<Area> areas;
+  late final List<Area> selected;
 
-  AreaSelectionScreen({required this.areas});
+  AreaSelectionScreen({required this.areas, List<Area>? selectedAreas}) {
+    selected = selectedAreas ?? [];
+  }
 
   @override
   _AreaSelectionScreenState createState() => _AreaSelectionScreenState();
@@ -22,6 +26,7 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
     super.initState();
     selectedAreas = Set<Area>();
     filteredAreas = widget.areas;
+    selectedAreas.addAll(widget.selected);
   }
 
   void updateSelectedAreas(Set<Area> areas) {
@@ -32,58 +37,70 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('בחירת איזורי התראה'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: AreaSearchDelegate(widget.areas, selectedAreas, updateSelectedAreas),
-              );
-            },
-          ),
-        ],
-      ),
-      body: ListView.builder(
-        itemCount: filteredAreas.length,
-        itemBuilder: (context, index) {
-          final area = filteredAreas[index];
-          final isSelected = selectedAreas.contains(area);
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('בחירת איזורי התראה'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: AreaSearchDelegate(
+                      widget.areas, selectedAreas, updateSelectedAreas),
+                );
+              },
+            ),
+          ],
+        ),
+        body: ListView.builder(
+          itemCount: filteredAreas.length,
+          itemBuilder: (context, index) {
+            final area = filteredAreas[index];
+            final isSelected = selectedAreas.contains(area);
 
-          return ListTile(
-            title: Text(area.labelHe ?? area.label ?? area.areaName),
-            onTap: () {
-              updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
-            },
-            tileColor: isSelected ? Colors.blue.withOpacity(0.3) : null,
-          );
-        },
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Spacer(),
-              TextButton(
-                onPressed: selectedAreas.isNotEmpty
-                    ? () {
-                  // Navigate to HomeScreen with selected areas
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreen(selectedAreas.toList()),
-                    ),
-                  );
-                } : null, // Disable the button if selectedAreas is empty
-                style: selectedAreas.isNotEmpty
-                    ? kBlueButtonStyle
-                    : kGreyButtonStyle,
-                child: const Text('סיום'),
-              ),
-            ],
+            return ListTile(
+              title: Text(area.labelHe ?? area.label ?? area.areaName),
+              onTap: () {
+                updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
+              },
+              tileColor: isSelected ? Colors.blue.withOpacity(0.3) : null,
+            );
+          },
+        ),
+        bottomNavigationBar: BottomAppBar(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                for (final area in selectedAreas) createAreaChip(area, () {
+                  setState(() {
+                    selectedAreas.remove(area);
+                  });
+                  // print("deleted");
+                }),
+                const Spacer(),
+                TextButton(
+                  onPressed: selectedAreas.isNotEmpty
+                      ? () {
+                          // Navigate to HomeScreen with selected areas
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  HomeScreen(selectedAreas.toList()),
+                            ),
+                          );
+                        }
+                      : null, // Disable the button if selectedAreas is empty
+                  style: selectedAreas.isNotEmpty
+                      ? kBlueButtonStyle
+                      : kGreyButtonStyle,
+                  child: const Text('סיום'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -138,7 +155,7 @@ class AreaSearchDelegate extends SearchDelegate<Area> {
 
   Widget _buildSearchResults(String query) {
     final filteredResults = areas.where((area) =>
-    area.labelHe.toLowerCase().contains(query.toLowerCase()) ||
+        area.labelHe.toLowerCase().contains(query.toLowerCase()) ||
         area.label.toLowerCase().contains(query.toLowerCase()) ||
         area.areaName.toLowerCase().contains(query.toLowerCase()));
 
