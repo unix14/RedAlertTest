@@ -70,51 +70,46 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
             );
           },
         ),
-        bottomNavigationBar: BottomAppBar(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                for (final area in selectedAreas) createAreaChip(area, () {
-                  setState(() {
-                    selectedAreas.remove(area);
-                  });
-                  // print("deleted");
-                }),
-                const Spacer(),
-                TextButton(
-                  onPressed: selectedAreas.isNotEmpty
-                      ? () {
-                          // Navigate to HomeScreen with selected areas
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  HomeScreen(selectedAreas.toList()),
-                            ),
-                          );
-                        }
-                      : null, // Disable the button if selectedAreas is empty
-                  style: selectedAreas.isNotEmpty
-                      ? kBlueButtonStyle
-                      : kGreyButtonStyle,
-                  child: const Text('סיום'),
-                ),
-              ],
-            ),
-          ),
-        ),
+        bottomNavigationBar: buildBottomAppBar(context, selectedAreas, (area) {
+          updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
+        }),
       ),
     );
   }
 }
 
-extension SetToggle<T> on Set<T> {
-  void toggle(T element) {
-    contains(element) ? remove(element) : add(element);
-  }
+BottomAppBar buildBottomAppBar(
+    BuildContext context, Set<Area> selectedAreas, AreaCallback onDelete) {
+  return BottomAppBar(
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          for (final area in selectedAreas) createAreaChip(area, onDelete),
+          const Spacer(),
+          TextButton(
+            onPressed: selectedAreas.isNotEmpty
+                ? () {
+                    // Navigate to HomeScreen with selected areas
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            HomeScreen(selectedAreas.toList()),
+                      ),
+                    );
+                  }
+                : null, // Disable the button if selectedAreas is empty
+            style:
+                selectedAreas.isNotEmpty ? kBlueButtonStyle : kGreyButtonStyle,
+            child: const Text('סיום'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
-class AreaSearchDelegate extends SearchDelegate<Area> {
+class AreaSearchDelegate extends SearchDelegate<Area?> {
   final List<Area> areas;
   final Set<Area> selectedAreas;
   final Function(Set<Area>) updateSelectedAreas;
@@ -127,7 +122,7 @@ class AreaSearchDelegate extends SearchDelegate<Area> {
       IconButton(
         icon: const Icon(Icons.clear),
         onPressed: () {
-          query = '';
+          close(context, null);
         },
       ),
     ];
@@ -138,22 +133,22 @@ class AreaSearchDelegate extends SearchDelegate<Area> {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
-        close(context, selectedAreas.first);
+        close(context, null);
       },
     );
   }
 
   @override
   Widget buildResults(BuildContext context) {
-    return _buildSearchResults(query);
+    return _buildSearchResults(context, query);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return _buildSearchResults(query);
+    return _buildSearchResults(context, query);
   }
 
-  Widget _buildSearchResults(String query) {
+  Widget _buildSearchResults(BuildContext context, String query) {
     final filteredResults = areas.where((area) =>
         area.labelHe.toLowerCase().contains(query.toLowerCase()) ||
         area.label.toLowerCase().contains(query.toLowerCase()) ||
@@ -161,21 +156,31 @@ class AreaSearchDelegate extends SearchDelegate<Area> {
 
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: ListView.builder(
-        itemCount: filteredResults.length,
-        itemBuilder: (context, index) {
-          final area = filteredResults.elementAt(index);
-          final isSelected = selectedAreas.contains(area);
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredResults.length,
+              itemBuilder: (context, index) {
+                final area = filteredResults.elementAt(index);
+                final isSelected = selectedAreas.contains(area);
 
-          return ListTile(
-            title: Text(area.labelHe ?? area.label ?? area.areaName),
-            onTap: () {
-              updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
-              close(context, area);
-            },
-            tileColor: isSelected ? Colors.blue.withOpacity(0.3) : null,
-          );
-        },
+                return ListTile(
+                  title: Text(area.labelHe ?? area.label ?? area.areaName),
+                  onTap: () {
+                    updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
+                    close(context, area);
+                  },
+                  tileColor: isSelected ? Colors.blue.withOpacity(0.3) : null,
+                );
+              },
+            ),
+          ),
+          buildBottomAppBar(context, selectedAreas, (area) {
+            updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
+            close(context, null);
+          })
+        ],
       ),
     );
   }

@@ -3,7 +3,15 @@ import 'package:flutter/material.dart';
 
 import '../models/area.dart';
 
-Widget createAreaChip(Area area, VoidCallback? onDelete) {
+typedef AreaCallback = void Function(Area area);
+
+extension SetToggle<T> on Set<T> {
+  void toggle(T element) {
+    contains(element) ? remove(element) : add(element);
+  }
+}
+
+Widget createAreaChip(Area area, AreaCallback? onDelete) {
   //todo add on click? to home screen panel?
   return Directionality(
     textDirection: TextDirection.rtl,
@@ -19,7 +27,9 @@ Widget createAreaChip(Area area, VoidCallback? onDelete) {
         ),
         deleteButtonTooltipMessage: "הסרה",
         deleteIconColor: Colors.white,
-        onDeleted: onDelete,
+        onDeleted: onDelete != null ? () {
+          onDelete(area);
+        } : null,
         backgroundColor: Colors.orange.withOpacity(0.7),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
