@@ -19,11 +19,11 @@ class RedAlert {
   late String cookies;
   late Map<String, String> headers;
 
-  late AlarmCallback onAlarmActivated;
+  late AlarmCallback? onAlarmActivated;
   late bool isAlarmActive;
   late Timer alertCheckTimer;
 
-  RedAlert(this.selectedAreas, {required this.onAlarmActivated}) {
+  RedAlert(this.selectedAreas, {this.onAlarmActivated}) {
     cookies = "";
     isAlarmActive = false;
     headers = {
@@ -152,7 +152,7 @@ class RedAlert {
       isAlarmActive = true;
 
       // Trigger the callback function provided by HomeScreen
-      onAlarmActivated();
+      onAlarmActivated??();
 
       // Set a timer for 10 minutes (600 seconds)
       Timer(const Duration(minutes: 10), () {
@@ -163,7 +163,7 @@ class RedAlert {
 
           //todo remove duplicate call here?
           // Trigger the callback function provided by HomeScreen to reset UI
-          onAlarmActivated();
+          onAlarmActivated??();
           //todo add response from RedAlert code into home screen callabck
         }
       });

@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/models/area.dart';
-import 'package:red_alert_test_android/widgets/area_selection_screen.dart';
+import 'package:red_alert_test_android/widgets/alerts_screen.dart';
 import 'package:red_alert_test_android/widgets/main_alert_screen.dart';
 import 'package:red_alert_test_android/widgets/settings_screen.dart';
-
-import '../common/date_extensions.dart';
-import '../common/extensions.dart';
 import '../common/styles.dart';
-import '../logic/red_alert.dart';
-import '../main.dart';
-import '../models/alert_model.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<Area> selectedAreas;
@@ -29,8 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     super.initState();
     _pages = [
-      MainAlertScreen(widget.selectedAreas), /// todo find a way to inect it once again here. maybe use publ;ic variable?? also shuld be fetched from shared prefs at some point
       MainAlertScreen(widget.selectedAreas),
+      /// todo find a way to inject it once again here. maybe use publ;ic variable?? also shuld be fetched from shared prefs at some point
+      const AlertsScreen(),
       SettingsScreen(),
     ];
   }
@@ -40,10 +35,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('אזעקת אמת'),
-        ),
-        body: _pages[_currentIndex],
+          appBar: AppBar(
+            title: const Text('אזעקת אמת'),
+          ),
+          body: _pages[_currentIndex],
           bottomNavigationBar: BottomNavigationBar(
               currentIndex: _currentIndex,
               onTap: (index) {
@@ -54,22 +49,28 @@ class _HomeScreenState extends State<HomeScreen> {
               items: [
                 BottomNavigationBarItem(
                   icon: homeIcon,
-                  activeIcon: Icon(homeIcon.icon,
-                    color: Colors.blue,),
+                  activeIcon: Icon(
+                    homeIcon.icon,
+                    color: Colors.blue,
+                  ),
                   label: 'ראשי',
                   tooltip: 'ראשי',
                 ),
                 BottomNavigationBarItem(
                   icon: notificationsIcon,
-                  activeIcon: Icon(notificationsIcon.icon,
-                    color: Colors.blue,),
+                  activeIcon: Icon(
+                    notificationsIcon.icon,
+                    color: Colors.blue,
+                  ),
                   label: 'התראות',
                   tooltip: 'התראות',
                 ),
                 BottomNavigationBarItem(
                   icon: settingsIcon,
-                  activeIcon: Icon(settingsIcon.icon,
-                    color: Colors.blue,),
+                  activeIcon: Icon(
+                    settingsIcon.icon,
+                    color: Colors.blue,
+                  ),
                   label: 'הגדרות',
                   tooltip: 'הגדרות',
                 ),

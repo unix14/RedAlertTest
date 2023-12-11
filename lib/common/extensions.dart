@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import '../logic/red_alert.dart';
+import '../models/alert_model.dart';
 import '../models/area.dart';
+import 'date_extensions.dart';
 
 typedef AreaCallback = void Function(Area area);
 
@@ -35,6 +37,59 @@ Widget createAreaChip(Area area, AreaCallback? onDelete) {
           borderRadius: BorderRadius.circular(16.0),
         ),
       ),
+    ),
+  );
+}
+
+Widget buildRedAlertsHistoryList(RedAlert redAlert, { int maximumItems = -1 }) {
+  return Expanded(
+    child: FutureBuilder<List<AlertModel>>(
+      future: redAlert.getRedAlertsHistory(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: SizedBox(child: CircularProgressIndicator()));
+        } else if (snapshot.hasError) {
+          return Text('שגיאה: ${snapshot.error}');
+        } else {
+          final alerts = snapshot.data ?? [];
+          return ListView.builder(
+            itemCount: maximumItems > -1 ? maximumItems : alerts.length,
+            itemBuilder: (context, index) {
+              final alert = alerts[index];
+              //todo implement on click events??
+              return Padding(
+                padding: const EdgeInsets.only(left: 18, right: 18),
+                child: Card(
+                  elevation: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          alert.data,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          alert.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // todo format date
+                        Text(getFormattedDate(alert.alertDate)),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        }
+      },
     ),
   );
 }

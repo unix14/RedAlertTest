@@ -27,6 +27,9 @@ void main() async {
 
   print('JSON Data: $jsonList');
 
+  //todo load from shared prefs the areas
+  //find a way to save data fetched from server in cache as long as possible, for example alerts history and category ids
+
 
   // Create an instance of MyApp with the loaded data
   MyApp myApp = MyApp(areas);

@@ -1,11 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../common/date_extensions.dart';
 import '../common/extensions.dart';
 import '../common/styles.dart';
 import '../logic/red_alert.dart';
 import '../main.dart';
-import '../models/alert_model.dart';
 import '../models/area.dart';
 import 'area_selection_screen.dart';
 
@@ -101,6 +98,7 @@ class _MainAlertScreenState extends State<MainAlertScreen> {
             ),
           ),
         ),
+        //todo implement instructions and articles to read [ horizontal cards list view
         const Padding(
           padding: EdgeInsets.all(18.0),
           child: Text(
@@ -111,55 +109,7 @@ class _MainAlertScreenState extends State<MainAlertScreen> {
             ),
           ),
         ),
-        Expanded(
-          child: FutureBuilder<List<AlertModel>>(
-            future: redAlert.getRedAlertsHistory(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: SizedBox(child: CircularProgressIndicator()));
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                final alerts = snapshot.data ?? [];
-                return ListView.builder(
-                  itemCount: alerts.length,
-                  itemBuilder: (context, index) {
-                    final alert = alerts[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 18, right: 18),
-                      child: Card(
-                        elevation: 4,
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                alert.data,
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                alert.title,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              // todo format date
-                              Text(getFormattedDate(alert.alertDate)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              }
-            },
-          ),
-        ),
+        buildRedAlertsHistoryList(redAlert, maximumItems: 5),
       ],
     );
   }
