@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:red_alert_test_android/widgets/area_selection_screen.dart';
 
-import 'logic/red_alert.dart';
 import 'models/area.dart';
 
+//think about how to make it singleton and injectable and approachable from different screens.
 List<Area> areas = [];
 
 void main() async {

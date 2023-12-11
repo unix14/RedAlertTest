@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:red_alert_test_android/common/constants.dart';
 import 'package:red_alert_test_android/models/area.dart';
 
 import '../common/extensions.dart';
@@ -24,15 +25,22 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
   @override
   void initState() {
     super.initState();
-    selectedAreas = Set<Area>();
+    selectedAreas = <Area>{};
     filteredAreas = widget.areas;
     selectedAreas.addAll(widget.selected);
   }
 
   void updateSelectedAreas(Set<Area> areas) {
-    setState(() {
-      selectedAreas = areas;
-    });
+    if (areas.length <= RedAlertConstants.MAX_ALERT_AREAS_POSSIBLE) {
+      setState(() {
+        selectedAreas = areas;
+      });
+    } else {
+      //show error message
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(RedAlertConstants.MAXIMUM_ALERT_MESSAGE),
+      ));
+    }
   }
 
   @override
@@ -78,37 +86,59 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
   }
 }
 
-BottomAppBar buildBottomAppBar(
-    BuildContext context,
-    Set<Area> selectedAreas,
-    AreaCallback onDelete,
-    {bool finishButtonIsVisible = true}
-    ) {
+Widget buildBottomAppBar(
+    BuildContext context, Set<Area> selectedAreas, AreaCallback onDelete,
+    {bool finishButtonIsVisible = true}) {
   return BottomAppBar(
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          for (final area in selectedAreas) createAreaChip(area, onDelete),
-          const Spacer(),
-          finishButtonIsVisible ? TextButton(
-            onPressed: selectedAreas.isNotEmpty
-                ? () {
-                    // Navigate to HomeScreen with selected areas
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            HomeScreen(selectedAreas.toList()),
+    height: 190,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Center(
+            child: Text(
+          RedAlertConstants.MAXIMUM_ALERT_MESSAGE,
+          style: TextStyle(
+            fontSize: 15,
+          ),
+        )),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.start,
+          children: [
+            for (final area in selectedAreas) createAreaChip(area, onDelete),
+          ],
+        ),
+        Row(
+          children: [
+            const Spacer(),
+            finishButtonIsVisible
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextButton(
+                      onPressed: selectedAreas.isNotEmpty
+                          ? () {
+                              // Navigate to HomeScreen with selected areas
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      HomeScreen(selectedAreas.toList()),
+                                ),
+                              );
+                            }
+                          : null, // Disable the button if selectedAreas is empty
+                      style: selectedAreas.isNotEmpty
+                          ? kBlueButtonStyle
+                          : kGreyButtonStyle,
+                      child: const Text(
+                        'סיום',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                    );
-                  }
-                : null, // Disable the button if selectedAreas is empty
-            style:
-                selectedAreas.isNotEmpty ? kBlueButtonStyle : kGreyButtonStyle,
-            child: const Text('סיום'),
-          ) : Container(),
-        ],
-      ),
+                    ),
+                  )
+                : Container(),
+          ],
+        ),
+      ],
     ),
   );
 }
@@ -122,20 +152,13 @@ class AreaSearchDelegate extends SearchDelegate<Area?> {
 
   @override
   List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          close(context, null);
-        },
-      ),
-    ];
+    return [];
   }
 
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.arrow_back),
+      icon: const Icon(Icons.clear),
       onPressed: () {
         close(context, null);
       },
@@ -180,10 +203,16 @@ class AreaSearchDelegate extends SearchDelegate<Area?> {
               },
             ),
           ),
-          buildBottomAppBar(context, selectedAreas, (area) {
-            updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
-            close(context, null);
-          }, finishButtonIsVisible: false)
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.start,
+            spacing: 0.0,
+            children: [
+              buildBottomAppBar(context, selectedAreas, (area) {
+                updateSelectedAreas(Set.from(selectedAreas)..toggle(area));
+                close(context, null);
+              }, finishButtonIsVisible: false)
+            ],
+          )
         ],
       ),
     );

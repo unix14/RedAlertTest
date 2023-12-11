@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:red_alert_test_android/common/styles.dart';
 import '../logic/red_alert.dart';
 import '../models/alert_model.dart';
 import '../models/area.dart';
@@ -41,7 +42,7 @@ Widget createAreaChip(Area area, AreaCallback? onDelete) {
   );
 }
 
-Widget buildRedAlertsHistoryList(RedAlert redAlert, { int maximumItems = -1 }) {
+Widget buildRedAlertsHistoryList(RedAlert redAlert, { int maximumItems = -1, GestureTapCallback? onReadMoreClicked}) {
   return Expanded(
     child: FutureBuilder<List<AlertModel>>(
       future: redAlert.getRedAlertsHistory(),
@@ -53,8 +54,25 @@ Widget buildRedAlertsHistoryList(RedAlert redAlert, { int maximumItems = -1 }) {
         } else {
           final alerts = snapshot.data ?? [];
           return ListView.builder(
-            itemCount: maximumItems > -1 ? maximumItems : alerts.length,
+            itemCount: maximumItems > -1 ? maximumItems + 1 : alerts.length,
             itemBuilder: (context, index) {
+              if(index == maximumItems) {
+                return GestureDetector(
+                  onTap: onReadMoreClicked,
+                  child: const Center(
+                    child: Text(
+                      'לכל ההתראות', // Text for the section heading
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        decoration: TextDecoration.underline,
+                        decorationStyle: TextDecorationStyle.dotted,
+                        color: Colors.blue,
+                        decorationColor: Colors.blue,
+                      ),
+                    ),
+                  ),
+                );
+              }
               final alert = alerts[index];
               //todo implement on click events??
               return Padding(

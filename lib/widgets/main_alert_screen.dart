@@ -109,7 +109,12 @@ class _MainAlertScreenState extends State<MainAlertScreen> {
             ),
           ),
         ),
-        buildRedAlertsHistoryList(redAlert, maximumItems: 5),
+        buildRedAlertsHistoryList(redAlert, maximumItems: 5, onReadMoreClicked: () {
+          //todo think about some navigation component that will handle all of the navigation in the app
+          // setState(() {
+          //   _currentTabIndex = 2;
+          // });
+        }),
       ],
     );
   }
