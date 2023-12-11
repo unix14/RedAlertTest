@@ -5,6 +5,7 @@ import '../common/styles.dart';
 import '../di/di.dart';
 import '../logic/red_alert.dart';
 import '../main.dart';
+import '../models/alert_category.dart';
 import '../models/area.dart';
 import 'area_selection_screen.dart';
 
@@ -58,68 +59,84 @@ class _MainAlertScreenState extends State<MainAlertScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Align(
-            alignment: Alignment.topRight,
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.start,
-              spacing: 10.0,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(3.0),
-                  child: TextButton(
-                    onPressed: () {
-                      // Navigate back to the area selection screen
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => AreaSelectionScreen(
-                            areas: areas,
-                            selectedAreas: widget.selectedAreas.toList(),
+    return NestedScrollView(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.start,
+                spacing: 10.0,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: TextButton(
+                      onPressed: () {
+                        // Navigate back to the area selection screen
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => AreaSelectionScreen(
+                              areas: areas,
+                              selectedAreas: widget.selectedAreas.toList(),
+                            ),
                           ),
+                        );
+                      },
+                      style: kBlueButtonStyle.copyWith(
+                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          const EdgeInsets.all(15.0),
                         ),
-                      );
-                    },
-                    style: kBlueButtonStyle.copyWith(
-                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                        const EdgeInsets.all(15.0),
                       ),
-                    ),
-                    child: const Text(
-                      'הוספת איזורי התראה',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                      child: const Text(
+                        'הוספת איזורי התראה',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                for (final area in widget.selectedAreas) createAreaChip(area, null),
-              ],
+                  for (final area in widget.selectedAreas) createAreaChip(area, null),
+                ],
+              ),
             ),
           ),
-        ),
-        //todo implement instructions and articles to read [ horizontal cards list view
-        const Padding(
-          padding: EdgeInsets.all(18.0),
-          child: Text(
-            'התראות אחרונות:', // Text for the section heading
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+          const Padding(
+            padding: EdgeInsets.only(right: 18, top: 18),
+            child: Text(
+              'הנחיות מצילות חיים', // Text for the section heading
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
             ),
           ),
-        ),
-        buildRedAlertsHistoryList(_redAlertRepo, maximumItems: 5, onReadMoreClicked: () {
-          //todo think about some navigation component that will handle all of the navigation in the app
-          // setState(() {
-          //   _currentTabIndex = 2;
-          // });
-        }),
-      ],
+          buildAlertCategoriesList(_redAlertRepo),
+          const Padding(
+            padding: EdgeInsets.all(18.0),
+            child: Text(
+              'התראות אחרונות', // Text for the section heading
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          buildRedAlertsHistoryList(_redAlertRepo, maximumItems: 5, onReadMoreClicked: () {
+            //todo think about some navigation component that will handle all of the navigation in the app
+            // setState(() {
+            //   _currentTabIndex = 2;
+            // });
+          }),
+        ],
+      ),
+      floatHeaderSlivers: false,
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+        return [];
+    },
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:red_alert_test_android/logic/red_alert_respository.dart';
 import '../common/constants.dart';
 import '../common/red_alert_logger.dart';
 import '../models/alert.dart';
+import '../models/alert_category.dart';
 import '../models/area.dart';
 
 typedef AlarmCallback = Function();
@@ -87,6 +88,32 @@ class RedAlert implements RedAlertRepository {
 
   int getAlertCount(Map<String, dynamic> alertsData) {
     return (alertsData["data"] as List).length;
+  }
+
+  @override
+  Future<List<AlertCategory>> getAlertCategories() async {
+    try {
+      // Replace this URL with the actual API endpoint
+      final response = await http.BrowserClient().get(Uri.parse(RedAlertConstants.alertCategoriesUrl));
+
+      if (response.statusCode == 200) {
+        // Decode the response using UTF-8 encoding
+        //todo make this as an http repository
+        const utf8Decoder = Utf8Decoder(allowMalformed: true);
+        final cleanedResponse = utf8Decoder.convert(response.body.codeUnits);
+
+        final List<dynamic> jsonList = json.decode(cleanedResponse);
+        return jsonList.map((json) => AlertCategory.fromJson(json)).toList();
+      } else {
+        // If the server did not return a 200 OK response,
+        // throw an exception.
+        throw Exception('Failed to load alert categories');
+      }
+    } catch (e) {
+      RedAlertLogger.logError('Error in getAlertCategories: ${e.hashCode} ${e.runtimeType} $e');
+      // Use stub data in case of network error or empty results
+      return RedAlertConstants.alertCategoriesData;
+    }
   }
 
   @override

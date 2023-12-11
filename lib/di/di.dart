@@ -1,8 +1,5 @@
-
-
 import 'package:get_it/get_it.dart';
 import 'package:red_alert_test_android/logic/red_alert.dart';
-
 import '../logic/red_alert_respository.dart';
 
 class DI  {
@@ -37,6 +34,4 @@ class DI  {
   static RedAlertRepository _initRedAlertRepo() {
     return RedAlert();
   }
-
-
 }

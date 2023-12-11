@@ -17,3 +17,10 @@ ButtonStyle kGreyButtonStyle = ButtonStyle(
 Icon homeIcon = Icon(Icons.home);
 Icon notificationsIcon = Icon(Icons.notifications);
 Icon settingsIcon = Icon(Icons.settings);
+
+const Color kOrangeColor = Color.fromARGB(255, 247, 124, 50);
+
+Widget kProgressBar = const Center(
+    child: SizedBox(
+        child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue))));

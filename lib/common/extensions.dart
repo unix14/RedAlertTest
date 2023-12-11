@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/common/styles.dart';
 import 'package:red_alert_test_android/logic/red_alert_respository.dart';
+
 import '../logic/red_alert.dart';
 import '../models/alert.dart';
+import '../models/alert_category.dart';
 import '../models/area.dart';
 import 'date_extensions.dart';
 
@@ -31,10 +33,12 @@ Widget createAreaChip(Area area, AreaCallback? onDelete) {
         ),
         deleteButtonTooltipMessage: "הסרה",
         deleteIconColor: Colors.white,
-        onDeleted: onDelete != null ? () {
-          onDelete(area);
-        } : null,
-        backgroundColor: Colors.orange.withOpacity(0.7),
+        onDeleted: onDelete != null
+            ? () {
+                onDelete(area);
+              }
+            : null,
+        backgroundColor: kOrangeColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
         ),
@@ -43,13 +47,14 @@ Widget createAreaChip(Area area, AreaCallback? onDelete) {
   );
 }
 
-Widget buildRedAlertsHistoryList(RedAlertRepository redAlert, { int maximumItems = -1, GestureTapCallback? onReadMoreClicked}) {
+Widget buildRedAlertsHistoryList(RedAlertRepository redAlert,
+    {int maximumItems = -1, GestureTapCallback? onReadMoreClicked}) {
   return Expanded(
     child: FutureBuilder<List<AlertModel>>(
       future: redAlert.getRedAlertsHistory(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: SizedBox(child: CircularProgressIndicator()));
+          return kProgressBar;
         } else if (snapshot.hasError) {
           return Text('שגיאה: ${snapshot.error}');
         } else {
@@ -57,7 +62,7 @@ Widget buildRedAlertsHistoryList(RedAlertRepository redAlert, { int maximumItems
           return ListView.builder(
             itemCount: maximumItems > -1 ? maximumItems + 1 : alerts.length,
             itemBuilder: (context, index) {
-              if(index == maximumItems) {
+              if (index == maximumItems) {
                 return GestureDetector(
                   onTap: onReadMoreClicked,
                   child: const Center(
@@ -88,7 +93,8 @@ Widget buildRedAlertsHistoryList(RedAlertRepository redAlert, { int maximumItems
                       children: [
                         Text(
                           alert.data,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -110,5 +116,83 @@ Widget buildRedAlertsHistoryList(RedAlertRepository redAlert, { int maximumItems
         }
       },
     ),
+  );
+}
+
+Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
+  return FutureBuilder<List<AlertCategory>>(
+    future: redAlert.getAlertCategories(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return kProgressBar;
+      } else if (snapshot.hasError) {
+        return Center(child: Text('שגיאה: ${snapshot.error}'));
+      } else {
+        // Use the data to build your UI
+        final categories = snapshot.data!;
+        return SizedBox(
+          height: 190,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              return Container(
+                padding: const EdgeInsets.all(8),
+                child: Card(
+                  elevation: 4,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: SizedBox(
+                          width: 120,
+                          height: double.infinity,
+                          child: Image.network(
+                            'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Bahad16.png/142px-Bahad16.png', // todo Replace with the actual URL
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                category.label,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(category.description),
+                              const SizedBox(height: 8),
+                              Expanded(
+                                child: Center(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      // Handle button click
+                                    },
+                                    child: const Text('למידע נוסף', style: TextStyle(color: Colors.blue)),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }
+    },
   );
 }
