@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:red_alert_test_android/logic/red_alert_respository.dart';
 import '../common/extensions.dart';
 import '../common/styles.dart';
+import '../di/di.dart';
 import '../logic/red_alert.dart';
 import '../main.dart';
 import '../models/area.dart';
@@ -17,19 +19,21 @@ class MainAlertScreen extends StatefulWidget {
 }
 
 class _MainAlertScreenState extends State<MainAlertScreen> {
-  late RedAlert redAlert;
+  final RedAlertRepository _redAlertRepo = DI.getSingleton<RedAlertRepository>();
   List<Map<String, dynamic>> alertData = []; // List to hold alert data
 
   @override
   void initState() {
     super.initState();
-    redAlert =
-        RedAlert(widget.selectedAreas, onAlarmActivated: updateUIOnAlarm);
+    _redAlertRepo.setSelectedAreas(widget.selectedAreas);
+    //todo bring back using the callback updateUIOnAlarm
+    // redAlert =
+    //     RedAlert(widget.selectedAreas, onAlarmActivated: updateUIOnAlarm);
     fetchAlertData(); // Fetch alert data when the screen initializes
   }
 
   void fetchAlertData() async {
-    final data = await redAlert.getRedAlerts();
+    final data = await _redAlertRepo.getRedAlerts();
     if (data != null) {
       setState(() {
         alertData = List.from(data['data']);
@@ -40,7 +44,7 @@ class _MainAlertScreenState extends State<MainAlertScreen> {
   @override
   void dispose() {
     super.dispose();
-    redAlert.cancelTimer();
+    _redAlertRepo.cancelTimer();
   }
 
   void updateUIOnAlarm() {
@@ -109,7 +113,7 @@ class _MainAlertScreenState extends State<MainAlertScreen> {
             ),
           ),
         ),
-        buildRedAlertsHistoryList(redAlert, maximumItems: 5, onReadMoreClicked: () {
+        buildRedAlertsHistoryList(_redAlertRepo, maximumItems: 5, onReadMoreClicked: () {
           //todo think about some navigation component that will handle all of the navigation in the app
           // setState(() {
           //   _currentTabIndex = 2;

@@ -46,6 +46,7 @@ dev_dependencies:
   http: ^0.13.6
   webdev: ^3.2.0
   logger: ^2.0.2+1
+  get_it: ^7.6.4
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

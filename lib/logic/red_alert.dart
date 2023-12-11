@@ -5,6 +5,7 @@ import 'dart:math';
 
 // import 'package:http/http.dart' as http;
 import 'package:http/browser_client.dart' as http;
+import 'package:red_alert_test_android/logic/red_alert_respository.dart';
 
 import '../common/constants.dart';
 import '../common/red_alert_logger.dart';
@@ -14,8 +15,10 @@ import '../models/area.dart';
 typedef AlarmCallback = Function();
 
 
-class RedAlert {
+class RedAlert implements RedAlertRepository {
+  @override
   late List<Area> selectedAreas;
+
   late String cookies;
   late Map<String, String> headers;
 
@@ -23,7 +26,7 @@ class RedAlert {
   late bool isAlarmActive;
   late Timer alertCheckTimer;
 
-  RedAlert(this.selectedAreas, {this.onAlarmActivated}) {
+  RedAlert({this.onAlarmActivated}) {
     cookies = "";
     isAlarmActive = false;
     headers = {
@@ -54,14 +57,24 @@ class RedAlert {
       if (alertsData != null) {
         final alertCount = getAlertCount(alertsData);
         if (alertCount > 0) {
+          //todo check if alarm is going in one of the selectedAreas
           activateAlarm();
         }
       }
     });
   }
 
+  @override
+  void setSelectedAreas(List<Area> selectedAreas) {
+    //todo remove this function if is not needed in the actual alert endpoint
+    // maybe use it on somewhere else \ settings screen
+    this.selectedAreas = selectedAreas;
+  }
+
+  @override
   void cancelTimer() {
     alertCheckTimer.cancel();
+    //todo fix cancel timer does not stop when leaving the screen
   }
 
   /// Fetches cookies from the host.
@@ -76,6 +89,7 @@ class RedAlert {
     return (alertsData["data"] as List).length;
   }
 
+  @override
   Future<List<AlertModel>> getRedAlertsHistory() async {
     try {
       final Uri uri = Uri.parse(RedAlertConstants.historyUrl);
@@ -100,6 +114,7 @@ class RedAlert {
     }
   }
 
+  @override
   Future<Map<String, dynamic>?> getRedAlerts() async {
     const host = RedAlertConstants.alertsEndpoint;
 

@@ -24,9 +24,6 @@ void main() async {
   // Convert the List<dynamic> to a List<Area>
   areas = jsonList.map((json) => Area.fromJson(json)).toList();
 
-
-  print('JSON Data: $jsonList');
-
   //todo load from shared prefs the areas
   //find a way to save data fetched from server in cache as long as possible, for example alerts history and category ids
 
