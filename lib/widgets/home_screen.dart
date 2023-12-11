@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/models/area.dart';
 import 'package:red_alert_test_android/widgets/area_selection_screen.dart';
 import 'package:red_alert_test_android/widgets/main_alert_screen.dart';
+import 'package:red_alert_test_android/widgets/settings_screen.dart';
 
 import '../common/date_extensions.dart';
 import '../common/extensions.dart';
@@ -30,9 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _pages = [
       MainAlertScreen(widget.selectedAreas), /// todo find a way to inect it once again here. maybe use publ;ic variable?? also shuld be fetched from shared prefs at some point
       MainAlertScreen(widget.selectedAreas),
-      MainAlertScreen(widget.selectedAreas),
-      // AlertsScreen(),
-      // SettingsScreen(),
+      SettingsScreen(),
     ];
   }
 
@@ -58,18 +57,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   activeIcon: Icon(homeIcon.icon,
                     color: Colors.blue,),
                   label: 'ראשי',
+                  tooltip: 'ראשי',
                 ),
                 BottomNavigationBarItem(
                   icon: notificationsIcon,
                   activeIcon: Icon(notificationsIcon.icon,
                     color: Colors.blue,),
                   label: 'התראות',
+                  tooltip: 'התראות',
                 ),
                 BottomNavigationBarItem(
                   icon: settingsIcon,
                   activeIcon: Icon(settingsIcon.icon,
                     color: Colors.blue,),
                   label: 'הגדרות',
+                  tooltip: 'הגדרות',
                 ),
               ])),
     );
