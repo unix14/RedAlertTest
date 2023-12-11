@@ -8,7 +8,7 @@ import 'package:http/browser_client.dart' as http;
 
 import '../common/constants.dart';
 import '../common/red_alert_logger.dart';
-import '../models/alert_model.dart';
+import '../models/alert.dart';
 import '../models/area.dart';
 
 typedef AlarmCallback = Function();

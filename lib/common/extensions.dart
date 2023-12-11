@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/common/styles.dart';
 import '../logic/red_alert.dart';
-import '../models/alert_model.dart';
+import '../models/alert.dart';
 import '../models/area.dart';
 import 'date_extensions.dart';
 
