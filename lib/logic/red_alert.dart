@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:math';
 
-// import 'package:http/http.dart' as http;
-import 'package:http/browser_client.dart' as http;
+// import for non-web platform
+import 'package:http/http.dart' as http;
+//import for web platform
+import 'package:http/browser_client.dart' as httpForWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 
 import '../common/constants.dart';
 import '../common/red_alert_logger.dart';
@@ -23,7 +27,16 @@ class RedAlert {
   late bool isAlarmActive;
   late Timer alertCheckTimer;
 
+  //todo fix issues with this field
+  late var _client; //= http.BrowserClient();
+
   RedAlert(this.selectedAreas, {required this.onAlarmActivated}) {
+    //todo change this according to platform running
+    if (kIsWeb) {
+      _client = httpForWeb.BrowserClient();
+    } else {
+      _client = http.Client();
+    }
     cookies = "";
     isAlarmActive = false;
     headers = {
@@ -33,17 +46,21 @@ class RedAlert {
       "charset": "utf-8",
       "X-Requested-With": "XMLHttpRequest",
       "sec-ch-ua-mobile": "?0",
-      "User-Agent": "",
-      "sec-ch-ua-platform": "macOS",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+      "sec-ch-ua-platform": "Windows",
       "Accept": "*/*",
       "sec-ch-ua":
-      '".Not/A)Brand"v="99", "Google Chrome";v="103", "Chromium";v="103"',
+      '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
       "Sec-Fetch-Site": "same-origin",
       "Sec-Fetch-Mode": "cors",
       "Sec-Fetch-Dest": "empty",
       "Referer": "https://www.oref.org.il/12481-he/Pakar.aspx",
       "Accept-Encoding": "gzip, deflate, br",
       "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+      // "Access-Control-Allow-Origin": "*",  // Add this line for CORS
+      // "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+      // "Access-Control-Allow-Methods": "GET, HEAD",
+      // "Cookie": "MUID=192650EE77FE691A3DC8430C766E6814",
     };
 
     // Initialize the timer for periodic alert checks
@@ -62,14 +79,23 @@ class RedAlert {
 
   void cancelTimer() {
     alertCheckTimer.cancel();
+    //todo change this according to platform running
+    if (kIsWeb) {
+      (_client as httpForWeb.BrowserClient).close();
+    } else {
+      (_client as http.Client).close();
+    }
   }
 
   /// Fetches cookies from the host.
   Future<void> getCookies() async {
     const host = RedAlertConstants.host;
     var uri = Uri.parse(host);
-    final response = await http.BrowserClient().get(uri, headers: headers);
-    cookies = response.headers["set-cookie"] ?? "";
+    final response = await _client.get(uri, headers: headers);
+    cookies = response.headers["set-cookie"] ?? cookies;
+    // headers = response.headers;
+    RedAlertLogger.logInfo('[-] Showing response.headers ...${response.headers}');
+    RedAlertLogger.logInfo('[-] Showing cookies 1...$cookies');
   }
 
   int getAlertCount(Map<String, dynamic> alertsData) {
@@ -106,8 +132,18 @@ class RedAlert {
     try {
       final Uri uri = Uri.parse(host);
 
+      // Attach cookies to the headers
+      Map<String, String> headersWithCookies = {...headers};
+      if (cookies.isNotEmpty) {
+        headersWithCookies.addAll( {"cookie": cookies});// = cookies;
+      }
+
+    RedAlertLogger.logInfo('[-] Showing cookies 2...$cookies');
+    RedAlertLogger.logInfo('[-] Showing headersWithCookies ...$headersWithCookies');
+      // return null;
+
       //todo think about diffrentiation between mobile and chrome\web
-      final response = await http.BrowserClient().get(uri, headers: headers);
+      final response = await _client.get(uri, headers: headersWithCookies);
 
       if (response.statusCode == 200) {
         final String responseBody = response.body;
