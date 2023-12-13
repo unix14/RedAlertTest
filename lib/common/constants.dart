@@ -5,8 +5,8 @@ class RedAlertConstants {
   static const String suffix = "/WarningMessages/alert/alerts.json";
   static const String alertsEndpoint = "$host$suffix";
 
-  static const String historyUrl = 'https://www.oref.org.il/WarningMessages/History/AlertsHistory.json';
-  static const String alertCategoriesUrl = 'https://www.oref.org.il/Leftovers/HE.Leftovers.json';
+  static const String historyUrl = '$host/WarningMessages/History/AlertsHistory.json';
+  static const String alertCategoriesUrl = '$host/Leftovers/HE.Leftovers.json';
 
   static const int MAX_ALERT_AREAS_POSSIBLE = 6;
   static const String MAXIMUM_ALERT_MESSAGE = 'ניתן לבחור עד $MAX_ALERT_AREAS_POSSIBLE איזורי התראה שונים';
