@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
           appBar: AppBar(
-            title: const Text('אזעקת אמת'),
+            title: const Text('שילד און'),
           ),
           body: _pages[_currentIndex],
           bottomNavigationBar: BottomNavigationBar(

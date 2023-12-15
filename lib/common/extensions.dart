@@ -122,6 +122,8 @@ Widget buildRedAlertsHistoryList(RedAlertRepository redAlert,
 }
 
 Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
+  final PageController _pageController = PageController(viewportFraction: 0.8);
+
   return FutureBuilder<List<AlertCategory>>(
     future: redAlert.getAlertCategories(),
     builder: (context, snapshot) {
@@ -132,67 +134,114 @@ Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
       } else {
         // Use the data to build your UI
         final categories = snapshot.data!;
-        return SizedBox(
-          height: 190,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return Container(
-                padding: const EdgeInsets.all(8),
-                child: Card(
-                  elevation: 4,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: SizedBox(
-                          width: 120,
-                          height: double.infinity,
-                          child: Image.network(
-                            'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Bahad16.png/142px-Bahad16.png', // todo Replace with the actual URL
-                            fit: BoxFit.fill,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                category.label,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(category.description),
-                              const SizedBox(height: 8),
-                              Expanded(
-                                child: Center(
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      openWebLink(context, category.link);
-                                    },
-                                    child: const Text('למידע נוסף', style: TextStyle(color: Colors.blue)),
+        return Column(
+          children: [
+            SizedBox(
+              height: 190,
+              child: Stack(
+                children: [
+                  ListView.builder(
+                    controller: _pageController,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      return GestureDetector(
+                        onTap: () {
+                          openWebLink(context, category.link);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: Card(
+                            elevation: 4,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: SizedBox(
+                                    width: 120,
+                                    height: double.infinity,
+                                    child: Image.network(
+                                      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Bahad16.png/142px-Bahad16.png",
+                                      // Replace with the actual URL
+                                      fit: BoxFit.fill,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          category.label,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(category.description),
+                                        const SizedBox(height: 8),
+                                        Center(
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              openWebLink(
+                                                  context, category.link);
+                                            },
+                                            child: const Text('למידע נוסף',
+                                                style: TextStyle(
+                                                    color: Colors.blue)),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                ),
-              );
-            },
-          ),
+                  Positioned(
+                    right: 16,
+                    top: 80,
+                    child: Card(
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_left),
+                        onPressed: () {
+                          _pageController.previousPage(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.ease,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 16,
+                    top: 80,
+                    child: Card(
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_right),
+                        onPressed: () {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.ease,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       }
     },
