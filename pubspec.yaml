@@ -49,6 +49,7 @@ dev_dependencies:
   get_it: ^7.6.4
   webview_universal: ^0.0.5
   window_manager: ^0.3.7
+  audioplayers: ^0.20.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

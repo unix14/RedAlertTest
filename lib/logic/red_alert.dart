@@ -20,15 +20,13 @@ class RedAlert implements RedAlertRepository {
   @override
   late List<Area> selectedAreas;
 
-  late String cookies;
   late Map<String, String> headers;
 
   late AlarmCallback? onAlarmActivated;
   late bool isAlarmActive;
   late Timer alertCheckTimer;
 
-  RedAlert({this.onAlarmActivated}) {
-    cookies = "";
+  RedAlert() {
     isAlarmActive = false;
     headers = {
       "Host": "www.oref.org.il",
@@ -52,7 +50,6 @@ class RedAlert implements RedAlertRepository {
 
     // Initialize the timer for periodic alert checks
     alertCheckTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      // await getCookies();
       // Check for new alerts
       final alertsData = await getRedAlerts();
       if (alertsData != null) {
@@ -63,6 +60,11 @@ class RedAlert implements RedAlertRepository {
         }
       }
     });
+  }
+
+  @override
+  void setOnAlarmActivated(AlarmCallback? onAlarmActivated) {
+    this.onAlarmActivated = onAlarmActivated;
   }
 
   @override
@@ -78,16 +80,8 @@ class RedAlert implements RedAlertRepository {
     //todo fix cancel timer does not stop when leaving the screen
   }
 
-  /// Fetches cookies from the host.
-  Future<void> getCookies() async {
-    const host = RedAlertConstants.host;
-    var uri = Uri.parse(host);
-    final response = await http.get(uri, headers: headers);
-    cookies = response.headers["set-cookie"] ?? "";
-  }
-
   int getAlertCount(Map<String, dynamic> alertsData) {
-    return (alertsData["data"] as List).length;
+    return alertsData.isNotEmpty ? (alertsData["data"] as List).length : 0;
   }
 
   @override

@@ -7,6 +7,7 @@ import '../common/styles.dart';
 import '../di/di.dart';
 import '../main.dart';
 import '../models/area.dart';
+import 'alarm_screen.dart';
 import 'area_selection_screen.dart';
 
 class MainAlertScreen extends StatefulWidget {
@@ -28,9 +29,16 @@ class _MainAlertScreenState extends State<MainAlertScreen> with WindowListener {
     super.initState();
     windowManager.addListener(this);
     _redAlertRepo.setSelectedAreas(widget.selectedAreas);
-    //todo bring back using the callback updateUIOnAlarm
-    // redAlert =
-    //     RedAlert(widget.selectedAreas, onAlarmActivated: updateUIOnAlarm);
+    _redAlertRepo.setOnAlarmActivated(() {
+      // Navigate to the AlarmScreen and pass the alertData
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AlarmScreen(alertData: alertData),
+        ),
+      );
+    });
+
     fetchAlertData(); // Fetch alert data when the screen initializes
     _initWindow();
   }

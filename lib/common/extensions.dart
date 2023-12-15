@@ -137,10 +137,10 @@ Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
         return Column(
           children: [
             SizedBox(
-              height: 190,
+              height: 195,
               child: Stack(
                 children: [
-                  ListView.builder(
+                  PageView.builder(
                     controller: _pageController,
                     scrollDirection: Axis.horizontal,
                     itemCount: categories.length,
@@ -158,10 +158,9 @@ Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.only(bottom: 8, right: 8),
                                   child: SizedBox(
-                                    width: 120,
-                                    height: double.infinity,
+                                    width: 100,
                                     child: Image.network(
                                       "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Bahad16.png/142px-Bahad16.png",
                                       // Replace with the actual URL
@@ -183,8 +182,9 @@ Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
-                                        Text(category.description),
+                                        SizedBox(
+                                          width: 140,
+                                            child: Text(category.description)),
                                         const SizedBox(height: 8),
                                         Center(
                                           child: ElevatedButton(
@@ -217,7 +217,7 @@ Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
                         onPressed: () {
                           _pageController.previousPage(
                             duration: const Duration(milliseconds: 500),
-                            curve: Curves.ease,
+                            curve: Curves.easeInCubic,
                           );
                         },
                       ),
@@ -232,7 +232,7 @@ Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
                         onPressed: () {
                           _pageController.nextPage(
                             duration: const Duration(milliseconds: 500),
-                            curve: Curves.ease,
+                            curve: Curves.easeInCubic,
                           );
                         },
                       ),
