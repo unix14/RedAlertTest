@@ -59,20 +59,23 @@ Widget buildRedAlertsHistoryList(RedAlertRepository redAlert,
         } else {
           final alerts = snapshot.data ?? [];
           return ListView.builder(
-            itemCount: maximumItems > -1 ? maximumItems + 1 : alerts.length,
+            itemCount: maximumItems > -1 ? maximumItems + 1 : alerts.length + 1,
             itemBuilder: (context, index) {
-              if (index == maximumItems) {
-                return GestureDetector(
-                  onTap: onReadMoreClicked,
-                  child: const Center(
-                    child: Text(
-                      'לכל ההתראות', // Text for the section heading
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        decoration: TextDecoration.underline,
-                        decorationStyle: TextDecorationStyle.dotted,
-                        color: Colors.blue,
-                        decorationColor: Colors.blue,
+              if (index == maximumItems || index == alerts.length) {
+                return Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: GestureDetector(
+                    onTap: onReadMoreClicked,
+                    child: const Center(
+                      child: Text(
+                        'לכל ההתראות', // Text for the section heading
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          decoration: TextDecoration.underline,
+                          decorationStyle: TextDecorationStyle.dotted,
+                          color: Colors.blue,
+                          decorationColor: Colors.blue,
+                        ),
                       ),
                     ),
                   ),

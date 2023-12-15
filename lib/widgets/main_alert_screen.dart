@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:red_alert_test_android/common/constants.dart';
 import 'package:red_alert_test_android/logic/red_alert_respository.dart';
 import 'package:window_manager/window_manager.dart';
 import '../common/extensions.dart';
@@ -161,6 +162,7 @@ class _MainAlertScreenState extends State<MainAlertScreen> with WindowListener {
             ),
           ),
           buildRedAlertsHistoryList(_redAlertRepo, maximumItems: 5, onReadMoreClicked: () {
+            openWebLink(context, RedAlertConstants.allAlertsUrl);
             //todo think about some navigation component that will handle all of the navigation in the app
             // setState(() {
             //   _currentTabIndex = 2;

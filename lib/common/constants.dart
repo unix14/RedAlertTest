@@ -8,6 +8,8 @@ class RedAlertConstants {
   static const String historyUrl = '$host/WarningMessages/History/AlertsHistory.json';
   static const String alertCategoriesUrl = '$host/Leftovers/HE.Leftovers.json';
 
+  static const String allAlertsUrl = "$host/12481-he/Pakar.aspx";
+
   static const int MAX_ALERT_AREAS_POSSIBLE = 6;
   static const String MAXIMUM_ALERT_MESSAGE = 'ניתן לבחור עד $MAX_ALERT_AREAS_POSSIBLE איזורי התראה שונים';
 
