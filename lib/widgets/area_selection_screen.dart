@@ -51,6 +51,12 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
         appBar: AppBar(
           title: const Text('בחירת איזורי התראה'),
           actions: [
+            // IconButton(
+            //   icon: const Icon(Icons.arrow_back),
+            //   onPressed: () {
+            //     Navigator.pop(context);
+            //   },
+            // ),
             IconButton(
               icon: const Icon(Icons.search),
               onPressed: () {

@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-// import 'package:http/http.dart' as http;
-import 'package:http/browser_client.dart' as http;
+import 'package:http/http.dart' as http;
+// import 'package:http/browser_client.dart' as http;
 import 'package:red_alert_test_android/logic/red_alert_respository.dart';
 
 import '../common/constants.dart';
-import '../common/red_alert_logger.dart';
+import '../custom/red_alert_logger.dart';
 import '../models/alert.dart';
 import '../models/alert_category.dart';
 import '../models/area.dart';
@@ -52,7 +52,7 @@ class RedAlert implements RedAlertRepository {
 
     // Initialize the timer for periodic alert checks
     alertCheckTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      await getCookies();
+      // await getCookies();
       // Check for new alerts
       final alertsData = await getRedAlerts();
       if (alertsData != null) {
@@ -82,7 +82,7 @@ class RedAlert implements RedAlertRepository {
   Future<void> getCookies() async {
     const host = RedAlertConstants.host;
     var uri = Uri.parse(host);
-    final response = await http.BrowserClient().get(uri, headers: headers);
+    final response = await http.get(uri, headers: headers);
     cookies = response.headers["set-cookie"] ?? "";
   }
 
@@ -94,7 +94,7 @@ class RedAlert implements RedAlertRepository {
   Future<List<AlertCategory>> getAlertCategories() async {
     try {
       // Replace this URL with the actual API endpoint
-      final response = await http.BrowserClient().get(Uri.parse(RedAlertConstants.alertCategoriesUrl));
+      final response = await http.get(Uri.parse(RedAlertConstants.alertCategoriesUrl));
 
       if (response.statusCode == 200) {
         // Decode the response using UTF-8 encoding
@@ -120,7 +120,7 @@ class RedAlert implements RedAlertRepository {
   Future<List<AlertModel>> getRedAlertsHistory() async {
     try {
       final Uri uri = Uri.parse(RedAlertConstants.historyUrl);
-      final response = await http.BrowserClient().get(uri, headers: headers);
+      final response = await http.get(uri, headers: headers);
 
       if (response.statusCode == 200) {
         // Decode the response using UTF-8 encoding
@@ -149,7 +149,9 @@ class RedAlert implements RedAlertRepository {
       final Uri uri = Uri.parse(host);
 
       //todo think about diffrentiation between mobile and chrome\web
-      final response = await http.BrowserClient().get(uri, headers: headers);
+      final response = await http.get(uri, headers: headers);
+      //todo think about deploying cloud function to firebase that will do the operation and will update the results into firestore
+      //todo then here implement firestore listening
 
       if (response.statusCode == 200) {
         final String responseBody = response.body;

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/logic/red_alert_respository.dart';
+import 'package:window_manager/window_manager.dart';
 import '../common/extensions.dart';
 import '../common/styles.dart';
 import '../di/di.dart';
-import '../logic/red_alert.dart';
 import '../main.dart';
-import '../models/alert_category.dart';
 import '../models/area.dart';
 import 'area_selection_screen.dart';
 
@@ -19,18 +18,53 @@ class MainAlertScreen extends StatefulWidget {
   _MainAlertScreenState createState() => _MainAlertScreenState();
 }
 
-class _MainAlertScreenState extends State<MainAlertScreen> {
+class _MainAlertScreenState extends State<MainAlertScreen> with WindowListener {
   final RedAlertRepository _redAlertRepo = DI.getSingleton<RedAlertRepository>();
   List<Map<String, dynamic>> alertData = []; // List to hold alert data
 
   @override
   void initState() {
     super.initState();
+    windowManager.addListener(this);
     _redAlertRepo.setSelectedAreas(widget.selectedAreas);
     //todo bring back using the callback updateUIOnAlarm
     // redAlert =
     //     RedAlert(widget.selectedAreas, onAlarmActivated: updateUIOnAlarm);
     fetchAlertData(); // Fetch alert data when the screen initializes
+    _initWindow();
+  }
+
+  void _initWindow() async {
+    // Add this line to override the default close handler
+    await windowManager.setPreventClose(true);
+    setState(() {});
+  }
+
+  @override
+  void onWindowClose() {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: const Text('האם לסגור את שילד און?'),
+            actions: [
+              TextButton(
+                child: const Text('לא'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('כן'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await windowManager.destroy();
+                },
+              ),
+            ],
+          );
+        },
+      );
   }
 
   void fetchAlertData() async {
@@ -46,6 +80,7 @@ class _MainAlertScreenState extends State<MainAlertScreen> {
   void dispose() {
     super.dispose();
     _redAlertRepo.cancelTimer();
+    windowManager.removeListener(this);
   }
 
   void updateUIOnAlarm() {

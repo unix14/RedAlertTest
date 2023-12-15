@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:red_alert_test_android/common/styles.dart';
 import 'package:red_alert_test_android/logic/red_alert_respository.dart';
+import "package:webview_universal/webview_universal.dart";
 
-import '../logic/red_alert.dart';
 import '../models/alert.dart';
 import '../models/alert_category.dart';
 import '../models/area.dart';
@@ -175,7 +174,7 @@ Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
                                 child: Center(
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      // Handle button click
+                                      openWebLink(context, category.link);
                                     },
                                     child: const Text('למידע נוסף', style: TextStyle(color: Colors.blue)),
                                   ),
@@ -194,5 +193,21 @@ Widget buildAlertCategoriesList(RedAlertRepository redAlert) {
         );
       }
     },
+  );
+}
+
+Future<void> openWebLink(BuildContext context, String link) async {
+  WebViewController webViewController = WebViewController();
+
+  await webViewController.init(
+    context: context,
+    uri: Uri.parse(link),
+    setState: (void Function() fn) {
+      //todo figure out why we need this
+      // Navigator.pop(context);
+    },
+  );
+  WebView(
+    controller: webViewController,
   );
 }

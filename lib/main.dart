@@ -3,14 +3,17 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:red_alert_test_android/widgets/area_selection_screen.dart';
+import 'package:red_alert_test_android/widgets/home_screen.dart';
 
 import 'models/area.dart';
+import 'package:window_manager/window_manager.dart';
 
 //think about how to make it singleton and injectable and approachable from different screens.
 List<Area> areas = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initPcWindow();
 
   String jsonString = await rootBundle.loadString('assets/targets.json');
   // Map<String, dynamic> jsonData = json.decode(jsonString);
@@ -35,6 +38,31 @@ void main() async {
   runApp(myApp);
 }
 
+Future<void> initPcWindow() async {
+  await windowManager.ensureInitialized();
+
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(420, 1000),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.normal,
+    fullScreen: false,
+    windowButtonVisibility: false,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+
+    windowManager.setResizable(false);
+    windowManager.setFullScreen(false);
+    // windowManager.setOpacity(0.2);
+    // windowManager.setPreventClose(true); // see usage on main alert screen
+    // windowManager.setVisibleOnAllWorkspaces(true);
+    // windowManager.setMovable(false);
+  });
+}
+
 // class MyApp extends StatelessWidget {
 //   @override
 //   Widget build(BuildContext context) {
@@ -57,13 +85,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Red Alert Test',
+      title: 'Shield On',
       debugShowCheckedModeBanner: false,
-      // home: HomeScreen(), // todo fix issues here
       // home: TestScreen(),
       home: Directionality(
           textDirection: TextDirection.rtl,
           child: AreaSelectionScreen(areas: areas)),
+          // child: HomeScreen([])),
     );
   }
 }
