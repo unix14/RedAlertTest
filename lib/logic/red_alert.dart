@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../common/constants.dart';
 import '../common/red_alert_logger.dart';
 import '../models/area.dart';
+import 'network_manager.dart';
 
 typedef AlarmCallback = Function();
 
@@ -70,20 +71,39 @@ class RedAlert {
       if (alertsData != null) {
         final alertCount = getAlertCount(alertsData);
         if (alertCount > 0) {
+          //todo check if alarm is going in one of the selectedAreas
           activateAlarm();
         }
       }
     });
   }
 
+  // @override
+  // void setOnAlarmActivated(AlarmCallback? onAlarmActivated) {
+  //   this.onAlarmActivated = onAlarmActivated;
+  // }
+  //
+  // @override
+  // void setSelectedAreas(List<Area> selectedAreas) {
+  //   //todo remove this function if is not needed in the actual alert endpoint
+  //   // maybe use it on somewhere else \ settings screen
+  //   this.selectedAreas = selectedAreas;
+  // }
+
+  @override
   void cancelTimer() {
     alertCheckTimer.cancel();
+    //todo fix cancel timer does not stop when leaving the screen
     //todo change this according to platform running
     if (kIsWeb) {
       (_client as httpForWeb.BrowserClient).close();
     } else {
       (_client as http.Client).close();
     }
+  }
+
+  int getAlertCount(Map<String, dynamic> alertsData) {
+    return alertsData.isNotEmpty ? (alertsData["data"] as List).length : 0;
   }
 
   /// Fetches cookies from the host.
@@ -97,10 +117,62 @@ class RedAlert {
     RedAlertLogger.logInfo('[-] Showing cookies 1...$cookies');
   }
 
+  @override
+  Future<List<AlertCategory>> getAlertCategories() async {
+    try {
+      // Replace this URL with the actual API endpoint
+      final response = await http.get(Uri.parse(RedAlertConstants.alertCategoriesUrl));
+
+      if (response.statusCode == 200) {
+        // Decode the response using UTF-8 encoding
+        //todo make this as an http repository
+        const utf8Decoder = Utf8Decoder(allowMalformed: true);
+        final cleanedResponse = utf8Decoder.convert(response.body.codeUnits);
+
+        final List<dynamic> jsonList = json.decode(cleanedResponse);
+        return jsonList.map((json) => AlertCategory.fromJson(json)).toList();
+      } else {
+        // If the server did not return a 200 OK response,
+        // throw an exception.
+        throw Exception('Failed to load alert categories');
+      }
+    } catch (e) {
+      RedAlertLogger.logError('Error in getAlertCategories: ${e.hashCode} ${e.runtimeType} $e');
+      // Use stub data in case of network error or empty results
+      return RedAlertConstants.alertCategoriesData;
+    }
+  }
+
+  @override
+  Future<List<AlertModel>> getRedAlertsHistory() async {
+    try {
+      final Uri uri = Uri.parse(RedAlertConstants.historyUrl);
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        // Decode the response using UTF-8 encoding
+        const utf8Decoder = Utf8Decoder(allowMalformed: true);
+        final cleanedResponse = utf8Decoder.convert(response.body.codeUnits);
+
+        final List<dynamic> jsonList = jsonDecode(cleanedResponse);
+        final List<AlertModel> alertList = jsonList.map((json) => AlertModel.fromJson(json)).toList();
+        return alertList;
+      } else {
+        RedAlertLogger.logError('Non-200 status code: ${response.statusCode}');
+        RedAlertLogger.logInfo('Non-200 response body:\n${response.body}');
+        return [];
+      }
+    } catch (e, stackTrace) {
+      RedAlertLogger.logError('Error in getRedAlerts: ${e.hashCode} ${e.runtimeType} $e\n$stackTrace');
+      return [];
+    }
+  }
+
   int getAlertCount(Map<String, dynamic> alertsData) {
     return (alertsData["data"] as List).length;
   }
 
+  @override
   Future<Map<String, dynamic>?> getRedAlerts() async {
     const host = RedAlertConstants.alertsEndpoint;
 
@@ -119,6 +191,9 @@ class RedAlert {
 
       //todo think about diffrentiation between mobile and chrome\web
       final response = await _client.get(uri, headers: headersWithCookies);
+      // final response = await http.get(uri, headers: headers);
+      //todo think about deploying cloud function to firebase that will do the operation and will update the results into firestore
+      //todo then here implement firestore listening
 
       if (response.statusCode == 200) {
         final String responseBody = response.body;
